@@ -1,0 +1,41 @@
+const tintColorLight = '#0A2647';  // Dark blue
+const tintColorDark = '#144272';  // Slightly lighter dark blue for dark mode
+
+export default {
+  light: {
+    text: '#000000',
+    background: '#FFFFFF',
+    tint: tintColorLight,
+    tabIconDefault: '#86888A',
+    tabIconSelected: tintColorLight,
+    card: '#FFFFFF',
+    border: '#E5E5E5',
+    notification: '#FF3B30',
+    secondaryText: '#666666',
+    lightGrey: '#F5F7FA',
+    grey: '#E0E0E0',
+    white: '#FFFFFF',
+    success: '#34C759',
+    warning: '#FF9500',
+    error: '#FF3B30',
+    shadow: 'rgba(0, 0, 0, 0.05)',
+  },
+  dark: {
+    text: '#FFFFFF',
+    background: '#121212',
+    tint: tintColorDark,
+    tabIconDefault: '#86888A',
+    tabIconSelected: tintColorDark,
+    card: '#1E1E1E',
+    border: '#2C2C2C',
+    notification: '#FF453A',
+    secondaryText: '#ADADAD',
+    lightGrey: '#2C2C2C',
+    grey: '#3D3D3D',
+    darkGrey: '#86888A',
+    success: '#30D158',
+    warning: '#FF9F0A',
+    error: '#FF453A',
+    shadow: 'rgba(0, 0, 0, 0.2)',
+  },
+};
