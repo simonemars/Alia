@@ -20,6 +20,8 @@ type AuthState = {
 type AuthActions = {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  sendSignInLinkToEmail: (email: string) => Promise<void>;
+  signInWithEmailLink: (email: string, link: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   checkAuth: () => Promise<void>;
@@ -123,6 +125,66 @@ export const useAuthStore = create<AuthStore>()(
         set({ error: null });
       },
 
+      sendSignInLinkToEmail: async (email: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const actionCodeSettings = {
+            url: 'https://alia-65f2e.firebaseapp.com/finishSignIn',
+            handleCodeInApp: true,
+            iOS: {
+              bundleId: 'com.yourcompany.alia'
+            },
+            dynamicLinkDomain: process.env.FIREBASE_DYNAMIC_LINKS_DOMAIN
+          };
+
+          await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+          
+          // Save the email locally so you don't need to ask the user for it again
+          await SecureStore.setItemAsync('emailForSignIn', email);
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ 
+            isLoading: false, 
+            error: {
+              message: (error as Error).message,
+              code: 'EMAIL_LINK_ERROR'
+            }
+          });
+        }
+      },
+
+      signInWithEmailLink: async (email: string, link: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          if (auth.isSignInWithEmailLink(link)) {
+            const result = await auth.signInWithEmailLink(email, link);
+            
+            if (result.user) {
+              set({ 
+                isAuthenticated: true, 
+                user: {
+                  id: result.user.uid,
+                  email: result.user.email || '',
+                  name: result.user.displayName || ''
+                },
+                isLoading: false 
+              });
+            }
+          } else {
+            throw new Error('Invalid sign in link');
+          }
+        } catch (error) {
+          set({ 
+            isLoading: false, 
+            error: {
+              message: (error as Error).message,
+              code: 'EMAIL_LINK_SIGN_IN_ERROR'
+            }
+          });
+        }
+      },
+
       checkAuth: async () => {
         set({ isLoading: true });
         try {
@@ -162,6 +224,17 @@ export const useAuthStore = create<AuthStore>()(
         isAuthenticated: state.isAuthenticated,
         user: state.user,
       }),
+      storage: {
+        getItem: async (name: string): Promise<string | null> => {
+          return await SecureStore.getItemAsync(name);
+        },
+        setItem: async (name: string, value: string): Promise<void> => {
+          await SecureStore.setItemAsync(name, value);
+        },
+        removeItem: async (name: string): Promise<void> => {
+          await SecureStore.deleteItemAsync(name);
+        },
+      },
     }
   )
 );

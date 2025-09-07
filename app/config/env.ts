@@ -13,7 +13,8 @@ const getEnvVars = () => {
   };
 };
 
-export const env = getEnvVars();
+const env = getEnvVars();
+export default env;
 
 // Type definitions for environment variables
 export type EnvVars = ReturnType<typeof getEnvVars>;

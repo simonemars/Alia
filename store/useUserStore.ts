@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { UserProfile } from '@/types';
 
-import { getNearbyUsers as fetchNearbyUsersFromAPI } from '@/services/users';
+import { getNearbyUsers as fetchNearbyUsersFromAPI, updateUser as updateUserAPI } from '@/services/users';
 
 type UserState = {
   users: UserProfile[];
@@ -14,6 +14,7 @@ type UserState = {
 type UserActions = {
   fetchNearbyUsers: (latitude: number, longitude: number) => Promise<void>;
   updateSearchRadius: (radius: number) => void;
+  updateProfile: (userId: string, profile: Partial<UserProfile>) => Promise<void>;
   rateUser: (userId: string, rating: number) => Promise<void>;
 };
 
@@ -76,6 +77,33 @@ export const useUserStore = create<UserState & UserActions>((set) => ({
         isLoading: false, 
         error: (error as Error).message 
       });
+    }
+  },
+
+  updateProfile: async (userId, profile) => {
+    set({ isLoading: true });
+    try {
+      await updateUserAPI(userId, profile);
+      
+      set(state => {
+        const users = state.users.map(user =>
+          user.id === userId
+            ? { ...user, ...profile, updatedAt: new Date().toISOString() }
+            : user
+        );
+        
+        return {
+          users,
+          nearbyUsers: users,
+          isLoading: false
+        };
+      });
+    } catch (error) {
+      set({ 
+        isLoading: false, 
+        error: (error as Error).message 
+      });
+      throw error; // Re-throw to handle in UI
     }
   }
 }));

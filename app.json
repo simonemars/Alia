@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "alia",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.alia.app"
@@ -30,7 +29,10 @@
       "SUPABASE_ANON_KEY": "@supabase_anon_key",
       "API_BASE_URL": "@api_base_url",
       "ENABLE_ANALYTICS": "false",
-      "ENABLE_CRASH_REPORTING": "false"
+      "ENABLE_CRASH_REPORTING": "false",
+      "eas": {
+        "projectId": "your-project-id"
+      }
     },
     "plugins": [
       [
@@ -45,7 +47,14 @@
           "locationAlwaysAndWhenInUsePermission": "Allow Alia to use your location to find people and places nearby."
         }
       ],
-      "expo-camera"
+      "expo-camera",
+      [
+        "@react-native-firebase/app",
+        {
+          "android_package_name": "com.alia.app",
+          "ios_bundle_id": "com.alia.app"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

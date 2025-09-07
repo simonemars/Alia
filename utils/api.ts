@@ -1,4 +1,4 @@
-import { env } from '@/app/config/env';
+import env from '@/app/config/env';
 import * as SecureStore from 'expo-secure-store';
 
 const API_BASE_URL = env.apiBaseUrl;

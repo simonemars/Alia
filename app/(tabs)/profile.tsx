@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -16,11 +16,13 @@ import { spacing, fontSizes, fontWeights } from '@/constants/Styles';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useCheckInStore } from '@/store/useCheckInStore';
+import { useUserStore } from '@/store/useUserStore';
 import Avatar from '@/components/common/Avatar';
 import Button from '@/components/common/Button';
 import RangeSlider from '@/components/common/RangeSlider';
 import Badge from '@/components/common/Badge';
 import StarRating from '@/components/common/StarRating';
+import EditProfileModal from '@/components/users/EditProfileModal';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -31,16 +33,36 @@ export default function ProfileScreen() {
   
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const { updateProfile, isLoading: isUpdating, fetchNearbyUsers } = useUserStore(state => ({
+    updateProfile: state.updateProfile,
+    isLoading: state.isLoading,
+    fetchNearbyUsers: state.fetchNearbyUsers
+  }));
   
-  // Mock user data
-  const userProfile = {
-    name: 'Alex Johnson',
-    image: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
-    bio: 'Hiking enthusiast and amateur photographer',
-    hobbies: ['Photography', 'Hiking', 'Reading'],
-    sports: ['Tennis', 'Running'],
-    rating: { average: 4.8, count: 25 },
-  };
+  // Get user profile from store
+  const userProfile = useUserStore(state => state.users.find(u => u.id === user?.id));
+  const [error, setError] = useState('');
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Fetch user profile when component mounts
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+      
+      try {
+        // Using fetchNearbyUsers as a way to load the user profile
+        // In a production app, you'd want a dedicated fetchUserProfile endpoint
+        await fetchNearbyUsers(0, 0); // This will populate the users array
+        setIsLoadingProfile(false);
+      } catch (err) {
+        setError((err as Error).message);
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadProfile();
+  }, [user?.id]);
   
   // Handle logout confirmation
   const handleLogout = () => {
@@ -57,6 +79,23 @@ export default function ProfileScreen() {
     setSettingsModalVisible(true);
   };
   
+  if (isLoadingProfile) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text>Could not load profile. Please try again later.</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -118,7 +157,7 @@ export default function ProfileScreen() {
         <View style={styles.actionsContainer}>
           <Button
             title="Edit Profile"
-            onPress={() => console.log('Edit profile')}
+            onPress={() => setEditProfileVisible(true)}
             style={styles.editButton}
           />
           
@@ -236,6 +275,23 @@ export default function ProfileScreen() {
         </View>
       </Modal>
       
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        visible={editProfileVisible}
+        onClose={() => setEditProfileVisible(false)}
+        profile={userProfile}
+        isLoading={isUpdating}
+        onSave={async (profile) => {
+          try {
+            await updateProfile(userProfile.id, profile);
+            setEditProfileVisible(false);
+            setError('');
+          } catch (err) {
+            setError((err as Error).message);
+          }
+        }}
+      />
+
       {/* Logout Confirmation Modal */}
       <Modal
         visible={logoutConfirmVisible}
@@ -275,6 +331,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  errorText: {
+    color: Colors.light.error,
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',

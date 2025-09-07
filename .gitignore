@@ -1,41 +1,55 @@
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
 # production
-/build
-/dist
-/.expo
-/.expo-shared
+build/
+dist/
+web-build/
 
-# misc
-.DS_Store
+# env files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 *.log
 
 # IDE
-.idea
-.vscode
+.idea/
+.vscode/
 *.swp
 *.swo
 
 # Expo
 .expo/
+.expo-shared/
+expo-env.d.ts
+
+# native
+*.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
-*.orig.*
-web-build/
+
+# metro
+.metro-health-check*
+
+# typescript
+*.tsbuildinfo
 
 # macOS
 .DS_Store
+*.pem

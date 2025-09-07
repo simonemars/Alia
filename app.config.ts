@@ -28,6 +28,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     favicon: './assets/images/favicon.png'
   },
+  plugins: [
+    "expo-font",
+    "expo-router",
+    "expo-secure-store",
+    [
+      "expo-build-properties",
+      {
+        "ios": {
+          "useFrameworks": "static"
+        }
+      }
+    ]
+  ],
+  scheme: 'alia',
   extra: {
     // Add your Firebase config here
     firebaseApiKey: process.env.FIREBASE_API_KEY,
@@ -36,5 +50,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
     firebaseAppId: process.env.FIREBASE_APP_ID,
+    // Add email link authentication settings
+    firebaseActionCodeSettings: {
+      url: 'https://alia-65f2e.firebaseapp.com/finishSignIn',
+      handleCodeInApp: true,
+      iOS: {
+        bundleId: 'com.yourcompany.alia'
+      },
+      dynamicLinkDomain: process.env.FIREBASE_DYNAMIC_LINKS_DOMAIN
+    }
   },
 }); 
